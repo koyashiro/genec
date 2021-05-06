@@ -1,4 +1,7 @@
 pub mod editorconfig {
+    use anyhow::Result;
+    use std::io::Write;
+
     pub enum Eol {
         LF,
         CR,
@@ -20,6 +23,32 @@ pub mod editorconfig {
         trim_trailing_whitespace: Option<bool>,
     }
 
+    impl Config {
+        fn new(pattern: &str) -> Self {
+            Config {
+                pattern: pattern.to_string(),
+                charset: None,
+                eol: None,
+                indent_type: None,
+                indent_size: None,
+                insert_final_newline: None,
+                trim_trailing_whitespace: None,
+            }
+        }
+
+        fn serialize(&self) -> Result<String> {
+            let mut w = Vec::new();
+            writeln!(&mut w, "[{}]", &self.pattern)?;
+
+            if let Some(charset) = &self.charset {
+                writeln!(&mut w, "charset = {}", &charset)?;
+            }
+
+            let serialized = String::from_utf8(w)?;
+            Ok(serialized)
+        }
+    }
+
     pub struct EditorConfig {
         root: bool,
         configs: Vec<Config>,
@@ -27,11 +56,27 @@ pub mod editorconfig {
 
     impl EditorConfig {
         fn new() -> Self {
-            EditorConfig { configs: vec![] }
+            EditorConfig {
+                root: true,
+                configs: vec![],
+            }
         }
 
-        fn serialize(self) -> String {
-            format!("root = {root}\n", root = "true")
+        fn serialize(&self) -> Result<String> {
+            let mut w = Vec::new();
+
+            writeln!(
+                &mut w,
+                "root = {}",
+                if self.root { "true" } else { "false" }
+            )?;
+
+            for c in &self.configs {
+                write!(&mut w, "{}", &c.serialize()?);
+            }
+
+            let serialized = String::from_utf8(w)?;
+            Ok(serialized)
         }
     }
 
@@ -41,8 +86,18 @@ pub mod editorconfig {
 
         #[test]
         fn serialize_test() {
-            let editorconfig = EditorConfig::new();
-            assert_eq!(editorconfig.serialize(), "root = true\n");
+            let mut config = Config::new("*");
+            assert_eq!(&config.serialize().unwrap(), "[*]\n");
+            config.charset = Some("utf-8".to_string());
+            assert_eq!(&config.serialize().unwrap(), "[*]\ncharset = utf-8\n");
+
+            let mut editor_config = EditorConfig::new();
+            assert_eq!(&editor_config.serialize().unwrap(), "root = true\n");
+            editor_config.configs.push(config);
+            assert_eq!(
+                &editor_config.serialize().unwrap(),
+                "root = true\n[*]\ncharset = utf-8\n"
+            );
         }
     }
 }
