@@ -223,11 +223,11 @@ pub mod editorconfig {
     }
 
     #[cfg(test)]
-    mod editorconfig_test {
+    mod editor_config_test {
         use super::*;
 
         #[test]
-        fn serialize_test() {
+        fn editor_config_test() {
             let mut editor_config = EditorConfig::new();
             assert_eq!(&editor_config.to_string(), "root = true");
 
@@ -237,6 +237,18 @@ pub mod editorconfig {
             config.indent_style = IndentStyle::Space;
             config.indent_size = Some(2);
             editor_config.configs.push(config);
+            assert_eq!(
+                &editor_config.to_string(),
+                "\
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8\
+"
+            );
 
             let mut config = Config::new("*.rs");
             config.charset = Charset::UTF8;
@@ -244,6 +256,24 @@ pub mod editorconfig {
             config.indent_style = IndentStyle::Space;
             config.indent_size = Some(4);
             editor_config.configs.push(config);
+            assert_eq!(
+                &editor_config.to_string(),
+                "\
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+
+[*.rs]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8\
+"
+            );
 
             let mut config = Config::new("Makefile");
             config.charset = Charset::UTF8;
@@ -251,7 +281,6 @@ pub mod editorconfig {
             config.indent_style = IndentStyle::Tab;
             config.indent_size = Some(4);
             editor_config.configs.push(config);
-
             assert_eq!(
                 &editor_config.to_string(),
                 "\
