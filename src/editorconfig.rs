@@ -167,6 +167,13 @@ impl EditorConfig {
             configs: vec![],
         }
     }
+
+    pub fn base() -> Self {
+        EditorConfig {
+            root: true,
+            configs: vec![Config::base()],
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -310,6 +317,16 @@ mod editor_config_test {
         let editor_config = EditorConfig::new();
         assert!(editor_config.root);
         assert_eq!(editor_config.configs.len(), 0);
+    }
+
+    #[test]
+    fn base_test() {
+        let editor_config = EditorConfig::base();
+        assert!(editor_config.root);
+        assert_eq!(editor_config.configs.len(), 1);
+
+        let config = &editor_config.configs[0];
+        assert_eq!(config, &Config::base());
     }
 
     #[test]
