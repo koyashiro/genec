@@ -118,6 +118,20 @@ impl fmt::Display for Config {
             }
         }
 
+        if let Some(trim_trailing_whitespace) = self.trim_trailing_whitespace {
+            writeln!(f)?;
+            write!(
+                f,
+                "trim_trailing_whitespace = {}",
+                &trim_trailing_whitespace
+            )?;
+        }
+
+        if let Some(insert_final_newline) = self.insert_final_newline {
+            writeln!(f)?;
+            write!(f, "insert_final_newline = {}", &insert_final_newline)?;
+        }
+
         Ok(())
     }
 }
@@ -219,6 +233,30 @@ mod config_test {
         config.charset = Charset::None;
         assert_eq!(config.to_string(), "[*]");
     }
+
+    #[test]
+    fn trim_trailing_whitespace() {
+        let mut config = Config::new("*");
+        assert_eq!(config.to_string(), "[*]");
+        config.trim_trailing_whitespace = Some(true);
+        assert_eq!(config.to_string(), "[*]\ntrim_trailing_whitespace = true");
+        config.trim_trailing_whitespace = Some(false);
+        assert_eq!(config.to_string(), "[*]\ntrim_trailing_whitespace = false");
+        config.trim_trailing_whitespace = None;
+        assert_eq!(config.to_string(), "[*]");
+    }
+
+    #[test]
+    fn insert_final_newline_test() {
+        let mut config = Config::new("*");
+        assert_eq!(config.to_string(), "[*]");
+        config.insert_final_newline = Some(true);
+        assert_eq!(config.to_string(), "[*]\ninsert_final_newline = true");
+        config.insert_final_newline = Some(false);
+        assert_eq!(config.to_string(), "[*]\ninsert_final_newline = false");
+        config.insert_final_newline = None;
+        assert_eq!(config.to_string(), "[*]");
+    }
 }
 
 #[cfg(test)]
@@ -235,6 +273,8 @@ mod editor_config_test {
         config.end_of_line = EndOfLine::LF;
         config.indent_style = IndentStyle::Space;
         config.indent_size = Some(2);
+        config.trim_trailing_whitespace = Some(true);
+        config.insert_final_newline = Some(true);
         editor_config.configs.push(config);
         assert_eq!(
             &editor_config.to_string(),
@@ -245,7 +285,9 @@ root = true
 indent_style = space
 indent_size = 2
 end_of_line = lf
-charset = utf-8\
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true\
 "
         );
 
@@ -265,6 +307,8 @@ indent_style = space
 indent_size = 2
 end_of_line = lf
 charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
 
 [*.rs]
 indent_style = space
@@ -290,6 +334,8 @@ indent_style = space
 indent_size = 2
 end_of_line = lf
 charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
 
 [*.rs]
 indent_style = space
