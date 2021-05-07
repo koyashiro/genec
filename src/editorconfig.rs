@@ -330,17 +330,11 @@ mod editor_config_test {
     }
 
     #[test]
-    fn editor_config_test() {
+    fn to_string_test() {
         let mut editor_config = EditorConfig::new();
         assert_eq!(&editor_config.to_string(), "root = true");
 
-        let mut config = Config::new("*");
-        config.charset = Charset::UTF8;
-        config.end_of_line = EndOfLine::LF;
-        config.indent_style = IndentStyle::Space;
-        config.indent_size = Some(2);
-        config.trim_trailing_whitespace = Some(true);
-        config.insert_final_newline = Some(true);
+        let config = Config::base();
         editor_config.configs.push(config);
         assert_eq!(
             &editor_config.to_string(),
@@ -348,8 +342,6 @@ mod editor_config_test {
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
@@ -369,8 +361,6 @@ insert_final_newline = true\
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
@@ -396,8 +386,6 @@ charset = utf-8\
 root = true
 
 [*]
-indent_style = space
-indent_size = 2
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
