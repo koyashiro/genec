@@ -1,6 +1,7 @@
 use std::fmt;
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub enum IndentStyle {
     Space,
     Tab,
@@ -18,6 +19,7 @@ impl fmt::Display for IndentStyle {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub enum EndOfLine {
     LF,
     CR,
@@ -37,6 +39,7 @@ impl fmt::Display for EndOfLine {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub enum Charset {
     UTF8,
     UTF8BOM,
@@ -60,6 +63,7 @@ impl fmt::Display for Charset {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub struct Config {
     pub pattern: String,
     pub indent_style: IndentStyle,
@@ -137,6 +141,7 @@ impl fmt::Display for Config {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, PartialEq)]
 pub struct EditorConfig {
     pub root: bool,
     pub configs: Vec<Config>,
