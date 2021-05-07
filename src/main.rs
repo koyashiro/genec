@@ -4,6 +4,8 @@ use std::io;
 use anyhow::Result;
 
 mod editorconfig;
+mod genec;
+
 use editorconfig::EditorConfig;
 
 fn main() -> Result<()> {
