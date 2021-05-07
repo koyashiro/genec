@@ -2,33 +2,60 @@ pub mod editorconfig {
     use std::fmt;
 
     #[allow(dead_code)]
-    pub enum EndOfLine {
-        LF,
-        CR,
-        CRLF,
+    pub enum IndentStyle {
+        Space,
+        Tab,
+        None,
     }
 
-    impl fmt::Display for EndOfLine {
+    impl fmt::Display for IndentStyle {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match *self {
-                EndOfLine::LF => write!(f, "lf"),
-                EndOfLine::CR => write!(f, "cr"),
-                EndOfLine::CRLF => write!(f, "crlf"),
+            match self {
+                IndentStyle::Tab => write!(f, "tab"),
+                IndentStyle::Space => write!(f, "space"),
+                IndentStyle::None => Ok(()),
             }
         }
     }
 
     #[allow(dead_code)]
-    pub enum IndentStyle {
-        Space,
-        Tab,
+    pub enum EndOfLine {
+        LF,
+        CR,
+        CRLF,
+        None,
     }
 
-    impl fmt::Display for IndentStyle {
+    impl fmt::Display for EndOfLine {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match *self {
-                IndentStyle::Tab => write!(f, "tab"),
-                IndentStyle::Space => write!(f, "space"),
+            match self {
+                EndOfLine::LF => write!(f, "lf"),
+                EndOfLine::CR => write!(f, "cr"),
+                EndOfLine::CRLF => write!(f, "crlf"),
+                EndOfLine::None => Ok(()),
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub enum Charset {
+        UTF8,
+        UTF8BOM,
+        UTF16BE,
+        UTF16LE,
+        Other(String),
+        None,
+    }
+
+    impl fmt::Display for Charset {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Charset::UTF8 => write!(f, "utf-8"),
+                Charset::UTF8BOM => write!(f, "utf-8-bom"),
+                Charset::UTF16BE => write!(f, "utf-16-be"),
+                Charset::UTF16LE => write!(f, "utf-16-le"),
+                Charset::Other(c) => write!(f, "{}", c),
+                Charset::None => Ok(()),
             }
         }
     }
@@ -36,12 +63,12 @@ pub mod editorconfig {
     #[allow(dead_code)]
     pub struct Config {
         pattern: String,
-        charset: Option<String>,
-        end_of_line: Option<EndOfLine>,
-        indent_style: Option<IndentStyle>,
+        indent_style: IndentStyle,
         indent_size: Option<u32>,
-        insert_final_newline: Option<bool>,
+        end_of_line: EndOfLine,
+        charset: Charset,
         trim_trailing_whitespace: Option<bool>,
+        insert_final_newline: Option<bool>,
     }
 
     #[allow(dead_code)]
@@ -49,12 +76,12 @@ pub mod editorconfig {
         fn new(pattern: &str) -> Self {
             Config {
                 pattern: pattern.to_string(),
-                charset: None,
-                end_of_line: None,
-                indent_style: None,
+                indent_style: IndentStyle::None,
                 indent_size: None,
-                insert_final_newline: None,
+                end_of_line: EndOfLine::None,
+                charset: Charset::None,
                 trim_trailing_whitespace: None,
+                insert_final_newline: None,
             }
         }
     }
@@ -63,24 +90,33 @@ pub mod editorconfig {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(f, "[{}]", &self.pattern)?;
 
-            if let Some(charset) = &self.charset {
-                writeln!(f)?;
-                write!(f, "charset = {}", &charset)?;
-            }
-
-            if let Some(end_of_line) = &self.end_of_line {
-                writeln!(f)?;
-                write!(f, "end_of_line = {}", &end_of_line)?;
-            }
-
-            if let Some(indent_type) = &self.indent_style {
-                writeln!(f)?;
-                write!(f, "indent_type = {}", &indent_type)?;
+            match self.indent_style {
+                IndentStyle::None => {}
+                _ => {
+                    writeln!(f)?;
+                    write!(f, "indent_style = {}", &self.indent_style)?;
+                }
             }
 
             if let Some(indent_size) = &self.indent_size {
                 writeln!(f)?;
                 write!(f, "indent_size = {}", &indent_size)?;
+            }
+
+            match self.end_of_line {
+                EndOfLine::None => {}
+                _ => {
+                    writeln!(f)?;
+                    write!(f, "end_of_line = {}", &self.end_of_line)?;
+                }
+            }
+
+            match self.charset {
+                Charset::None => {}
+                _ => {
+                    writeln!(f)?;
+                    write!(f, "charset = {}", &self.charset)?;
+                }
             }
 
             Ok(())
@@ -134,23 +170,55 @@ pub mod editorconfig {
         }
 
         #[test]
-        fn charset_test() {
+        fn indent_style_test() {
             let mut config = Config::new("*");
-            config.charset = Some("utf-8".to_string());
-            assert_eq!(config.to_string(), "[*]\ncharset = utf-8");
-            config.charset = Some("utf-8-bom".to_string());
-            assert_eq!(config.to_string(), "[*]\ncharset = utf-8-bom");
+            assert_eq!(config.to_string(), "[*]");
+            config.indent_style = IndentStyle::Space;
+            assert_eq!(config.to_string(), "[*]\nindent_style = space");
+            config.indent_style = IndentStyle::Tab;
+            assert_eq!(config.to_string(), "[*]\nindent_style = tab");
+            config.indent_style = IndentStyle::None;
+            assert_eq!(config.to_string(), "[*]");
+        }
+
+        #[test]
+        fn indent_size_test() {
+            let mut config = Config::new("*");
+            assert_eq!(config.to_string(), "[*]");
+            config.indent_size = Some(2);
+            assert_eq!(config.to_string(), "[*]\nindent_size = 2");
+            config.indent_size = Some(4);
+            assert_eq!(config.to_string(), "[*]\nindent_size = 4");
+            config.indent_size = None;
+            assert_eq!(config.to_string(), "[*]");
         }
 
         #[test]
         fn end_of_line_test() {
             let mut config = Config::new("*");
-            config.end_of_line = Some(EndOfLine::LF);
+            assert_eq!(config.to_string(), "[*]");
+            config.end_of_line = EndOfLine::LF;
             assert_eq!(config.to_string(), "[*]\nend_of_line = lf");
-            config.end_of_line = Some(EndOfLine::CR);
+            config.end_of_line = EndOfLine::CR;
             assert_eq!(config.to_string(), "[*]\nend_of_line = cr");
-            config.end_of_line = Some(EndOfLine::CRLF);
+            config.end_of_line = EndOfLine::CRLF;
             assert_eq!(config.to_string(), "[*]\nend_of_line = crlf");
+            config.end_of_line = EndOfLine::None;
+            assert_eq!(config.to_string(), "[*]");
+        }
+
+        #[test]
+        fn charset_test() {
+            let mut config = Config::new("*");
+            assert_eq!(config.to_string(), "[*]");
+            config.charset = Charset::UTF8;
+            assert_eq!(config.to_string(), "[*]\ncharset = utf-8");
+            config.charset = Charset::UTF8BOM;
+            assert_eq!(config.to_string(), "[*]\ncharset = utf-8-bom");
+            config.charset = Charset::Other("shift_jis".to_string());
+            assert_eq!(config.to_string(), "[*]\ncharset = shift_jis");
+            config.charset = Charset::None;
+            assert_eq!(config.to_string(), "[*]");
         }
     }
 
@@ -164,23 +232,23 @@ pub mod editorconfig {
             assert_eq!(&editor_config.to_string(), "root = true");
 
             let mut config = Config::new("*");
-            config.charset = Some("utf-8".to_string());
-            config.end_of_line = Some(EndOfLine::LF);
-            config.indent_style = Some(IndentStyle::Space);
+            config.charset = Charset::UTF8;
+            config.end_of_line = EndOfLine::LF;
+            config.indent_style = IndentStyle::Space;
             config.indent_size = Some(2);
             editor_config.configs.push(config);
 
             let mut config = Config::new("*.rs");
-            config.charset = Some("utf-8".to_string());
-            config.end_of_line = Some(EndOfLine::LF);
-            config.indent_style = Some(IndentStyle::Space);
+            config.charset = Charset::UTF8;
+            config.end_of_line = EndOfLine::LF;
+            config.indent_style = IndentStyle::Space;
             config.indent_size = Some(4);
             editor_config.configs.push(config);
 
             let mut config = Config::new("Makefile");
-            config.charset = Some("utf-8".to_string());
-            config.end_of_line = Some(EndOfLine::LF);
-            config.indent_style = Some(IndentStyle::Tab);
+            config.charset = Charset::UTF8;
+            config.end_of_line = EndOfLine::LF;
+            config.indent_style = IndentStyle::Tab;
             config.indent_size = Some(4);
             editor_config.configs.push(config);
 
@@ -190,23 +258,23 @@ pub mod editorconfig {
 root = true
 
 [*]
-charset = utf-8
-end_of_line = lf
-indent_type = space
+indent_style = space
 indent_size = 2
+end_of_line = lf
+charset = utf-8
 
 [*.rs]
-charset = utf-8
-end_of_line = lf
-indent_type = space
+indent_style = space
 indent_size = 4
+end_of_line = lf
+charset = utf-8
 
 [Makefile]
-charset = utf-8
+indent_style = tab
+indent_size = 4
 end_of_line = lf
-indent_type = tab
-indent_size = 4\
-                "
+charset = utf-8\
+"
             );
         }
     }
