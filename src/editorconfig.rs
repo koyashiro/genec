@@ -61,18 +61,18 @@ impl fmt::Display for Charset {
 
 #[allow(dead_code)]
 pub struct Config {
-    pattern: String,
-    indent_style: IndentStyle,
-    indent_size: Option<u32>,
-    end_of_line: EndOfLine,
-    charset: Charset,
-    trim_trailing_whitespace: Option<bool>,
-    insert_final_newline: Option<bool>,
+    pub pattern: String,
+    pub indent_style: IndentStyle,
+    pub indent_size: Option<u32>,
+    pub end_of_line: EndOfLine,
+    pub charset: Charset,
+    pub trim_trailing_whitespace: Option<bool>,
+    pub insert_final_newline: Option<bool>,
 }
 
 #[allow(dead_code)]
 impl Config {
-    fn new(pattern: &str) -> Self {
+    pub fn new(pattern: &str) -> Self {
         Config {
             pattern: pattern.to_string(),
             indent_style: IndentStyle::None,
@@ -124,8 +124,8 @@ impl fmt::Display for Config {
 
 #[allow(dead_code)]
 pub struct EditorConfig {
-    root: bool,
-    configs: Vec<Config>,
+    pub root: bool,
+    pub configs: Vec<Config>,
 }
 
 #[allow(dead_code)]
