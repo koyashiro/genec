@@ -178,6 +178,19 @@ mod config_test {
     use super::*;
 
     #[test]
+    fn new_test() {
+        let pattern = "*";
+        let config = Config::new(&pattern);
+        assert_eq!(config.pattern, pattern);
+        assert_eq!(config.indent_style, IndentStyle::None);
+        assert_eq!(config.indent_size, None);
+        assert_eq!(config.end_of_line, EndOfLine::None);
+        assert_eq!(config.charset, Charset::None);
+        assert_eq!(config.trim_trailing_whitespace, None);
+        assert_eq!(config.insert_final_newline, None);
+    }
+
+    #[test]
     fn pattern_test() {
         let config = Config::new("*");
         assert_eq!(config.to_string(), "[*]");
@@ -267,6 +280,13 @@ mod config_test {
 #[cfg(test)]
 mod editor_config_test {
     use super::*;
+
+    #[test]
+    fn new_test() {
+        let editor_config = EditorConfig::new();
+        assert!(editor_config.root);
+        assert_eq!(editor_config.configs.len(), 0);
+    }
 
     #[test]
     fn editor_config_test() {
