@@ -102,7 +102,7 @@ pub mod editorconfig {
     #[allow(dead_code)]
     impl fmt::Display for EditorConfig {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            writeln!(f, "root = {}", if self.root { "true" } else { "false" })?;
+            writeln!(f, "root = {}", self.root)?;
 
             for c in &self.configs {
                 write!(f, "{}", c)?;
