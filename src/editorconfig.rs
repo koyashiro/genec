@@ -2,18 +2,18 @@ pub mod editorconfig {
     use std::fmt;
 
     #[allow(dead_code)]
-    pub enum Eol {
+    pub enum EndOfLine {
         LF,
         CR,
         CRLF,
     }
 
-    impl fmt::Display for Eol {
+    impl fmt::Display for EndOfLine {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             match *self {
-                Eol::LF => write!(f, "lf"),
-                Eol::CR => write!(f, "cr"),
-                Eol::CRLF => write!(f, "crlf"),
+                EndOfLine::LF => write!(f, "lf"),
+                EndOfLine::CR => write!(f, "cr"),
+                EndOfLine::CRLF => write!(f, "crlf"),
             }
         }
     }
@@ -37,7 +37,7 @@ pub mod editorconfig {
     pub struct Config {
         pattern: String,
         charset: Option<String>,
-        eol: Option<Eol>,
+        end_of_line: Option<EndOfLine>,
         indent_style: Option<IndentStyle>,
         indent_size: Option<u32>,
         insert_final_newline: Option<bool>,
@@ -50,7 +50,7 @@ pub mod editorconfig {
             Config {
                 pattern: pattern.to_string(),
                 charset: None,
-                eol: None,
+                end_of_line: None,
                 indent_style: None,
                 indent_size: None,
                 insert_final_newline: None,
@@ -68,9 +68,9 @@ pub mod editorconfig {
                 write!(f, "charset = {}", &charset)?;
             }
 
-            if let Some(eol) = &self.eol {
+            if let Some(end_of_line) = &self.end_of_line {
                 writeln!(f)?;
-                write!(f, "eol = {}", &eol)?;
+                write!(f, "end_of_line = {}", &end_of_line)?;
             }
 
             if let Some(indent_type) = &self.indent_style {
@@ -143,14 +143,14 @@ pub mod editorconfig {
         }
 
         #[test]
-        fn eol_test() {
+        fn end_of_line_test() {
             let mut config = Config::new("*");
-            config.eol = Some(Eol::LF);
-            assert_eq!(config.to_string(), "[*]\neol = lf");
-            config.eol = Some(Eol::CR);
-            assert_eq!(config.to_string(), "[*]\neol = cr");
-            config.eol = Some(Eol::CRLF);
-            assert_eq!(config.to_string(), "[*]\neol = crlf");
+            config.end_of_line = Some(EndOfLine::LF);
+            assert_eq!(config.to_string(), "[*]\nend_of_line = lf");
+            config.end_of_line = Some(EndOfLine::CR);
+            assert_eq!(config.to_string(), "[*]\nend_of_line = cr");
+            config.end_of_line = Some(EndOfLine::CRLF);
+            assert_eq!(config.to_string(), "[*]\nend_of_line = crlf");
         }
     }
 
@@ -165,21 +165,21 @@ pub mod editorconfig {
 
             let mut config = Config::new("*");
             config.charset = Some("utf-8".to_string());
-            config.eol = Some(Eol::LF);
+            config.end_of_line = Some(EndOfLine::LF);
             config.indent_style = Some(IndentStyle::Space);
             config.indent_size = Some(2);
             editor_config.configs.push(config);
 
             let mut config = Config::new("*.rs");
             config.charset = Some("utf-8".to_string());
-            config.eol = Some(Eol::LF);
+            config.end_of_line = Some(EndOfLine::LF);
             config.indent_style = Some(IndentStyle::Space);
             config.indent_size = Some(4);
             editor_config.configs.push(config);
 
             let mut config = Config::new("Makefile");
             config.charset = Some("utf-8".to_string());
-            config.eol = Some(Eol::LF);
+            config.end_of_line = Some(EndOfLine::LF);
             config.indent_style = Some(IndentStyle::Tab);
             config.indent_size = Some(4);
             editor_config.configs.push(config);
@@ -191,19 +191,19 @@ root = true
 
 [*]
 charset = utf-8
-eol = lf
+end_of_line = lf
 indent_type = space
 indent_size = 2
 
 [*.rs]
 charset = utf-8
-eol = lf
+end_of_line = lf
 indent_type = space
 indent_size = 4
 
 [Makefile]
 charset = utf-8
-eol = lf
+end_of_line = lf
 indent_type = tab
 indent_size = 4\
                 "
