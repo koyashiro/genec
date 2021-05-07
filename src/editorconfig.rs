@@ -87,6 +87,18 @@ impl Config {
             insert_final_newline: None,
         }
     }
+
+    pub fn base() -> Self {
+        Config {
+            pattern: "*".to_string(),
+            indent_style: IndentStyle::None,
+            indent_size: None,
+            end_of_line: EndOfLine::LF,
+            charset: Charset::UTF8,
+            trim_trailing_whitespace: Some(true),
+            insert_final_newline: Some(true),
+        }
+    }
 }
 
 impl fmt::Display for Config {
@@ -188,6 +200,18 @@ mod config_test {
         assert_eq!(config.charset, Charset::None);
         assert_eq!(config.trim_trailing_whitespace, None);
         assert_eq!(config.insert_final_newline, None);
+    }
+
+    #[test]
+    fn base_test() {
+        let config = Config::base();
+        assert_eq!(config.pattern, "*");
+        assert_eq!(config.indent_style, IndentStyle::None);
+        assert_eq!(config.indent_size, None);
+        assert_eq!(config.end_of_line, EndOfLine::LF);
+        assert_eq!(config.charset, Charset::UTF8);
+        assert_eq!(config.trim_trailing_whitespace, Some(true));
+        assert_eq!(config.insert_final_newline, Some(true));
     }
 
     #[test]
