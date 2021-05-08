@@ -6,7 +6,8 @@ use crate::editorconfig::Config;
 pub type ConfigSet = HashMap<String, Config>;
 
 pub mod config {
-    use std::{fs::File, path::PathBuf};
+    use std::fs::File;
+    use std::path::PathBuf;
 
     use anyhow::{Context, Result};
     use dirs::config_dir;
