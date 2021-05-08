@@ -32,4 +32,21 @@ pub mod config {
         let file = File::create(config_path)?;
         Ok(file)
     }
+
+    #[cfg(test)]
+    mod config_test {
+        use dirs::home_dir;
+
+        use super::*;
+
+        #[test]
+        fn config_path_test() {
+            let config_path = config_path().unwrap();
+            let home_path = home_dir().expect("failed to get home dir");
+            assert_eq!(
+                config_path,
+                home_path.join(".config").join("genec").join("config")
+            );
+        }
+    }
 }
